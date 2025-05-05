@@ -10,12 +10,12 @@ export class OrdersService {
   }
 
   public async createOrder({
-    dishesQuantityRequested,
+    dishesQuantity,
   }: {
-    dishesQuantityRequested: number;
+    dishesQuantity: number;
   }): Promise<Order> {
     let selectedDishes: Dish[] = [];
-    for (let i = 0; i < dishesQuantityRequested; i++) {
+    for (let i = 0; i < dishesQuantity; i++) {
       const randomIndex = Math.floor(Math.random() * RECIPES.length);
       const recipe = RECIPES[randomIndex];
       const dish: Dish = {
@@ -29,7 +29,7 @@ export class OrdersService {
     const order: Order = {
       id: crypto.randomUUID(),
       status: OrderStatus.PENDING,
-      dishesTotal: dishesQuantityRequested,
+      dishesTotal: dishesQuantity,
       dishesCompleted: 0,
       dishes: selectedDishes,
     };

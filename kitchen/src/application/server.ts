@@ -1,7 +1,9 @@
 import { RecipesService } from "@/services/recipes-service";
 import { OrdersService } from "@/services/orders-service";
 import { OrdersRepository } from "@/application/repositories/orders-repository";
+import { OrderSchema } from "@/application/schemas/order-schema";
 import { createServer } from "http";
+import { ZodError } from "zod";
 
 export const bootstrap = async () => {
   const ordersService = new OrdersService(new OrdersRepository());
@@ -35,10 +37,43 @@ export const bootstrap = async () => {
             body += chunk.toString();
           });
           req.on("end", async () => {
-            const order = JSON.parse(body);
-            await ordersService.createOrder(order); // ! FIX PARAMETER
-            res.writeHead(201);
-            res.end(JSON.stringify({ message: "Order created" }));
+            if (req.headers["content-type"] === "application/json") {
+              try {
+                const jsonBody = JSON.parse(body);
+                const data = OrderSchema.parse(jsonBody);
+                const { dishesQuantity } = data!;
+                await ordersService.createOrder({ dishesQuantity });
+                res.writeHead(201);
+                res.end(JSON.stringify({ message: "Order created" }));
+              } catch (error) {
+                if (error instanceof SyntaxError) {
+                  res.writeHead(400, { "Content-Type": "application/json" });
+                  res.end(
+                    JSON.stringify({
+                      message: "Invalid JSON",
+                    })
+                  );
+                } else if (error instanceof ZodError) {
+                  res.writeHead(400);
+                  res.end(
+                    JSON.stringify({
+                      message: "Bad request",
+                      description: error.format(),
+                    })
+                  );
+                } else {
+                  res.writeHead(500);
+                  res.end(JSON.stringify({ message: "Internal Server Error" }));
+                }
+              }
+            } else {
+              res.writeHead(415, { "Content-Type": "application/json" });
+              res.end(
+                JSON.stringify({
+                  message: "Unsupported Media Type: Only JSON accepted",
+                })
+              );
+            }
           });
         } else {
           res.writeHead(404);
@@ -57,7 +92,7 @@ export const bootstrap = async () => {
       res.end(JSON.stringify({ message: "Internal Server Error" }));
     }
 
-    // status codes: 200, 201, 204, 400, 404, 405, 500
+    // status codes: 200, 201, 204, 400, 404, 405, 415, 500
   }).listen(3000, () => {
     console.log("Server is running on port 3000");
   });

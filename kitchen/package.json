@@ -30,5 +30,8 @@
       "**/*.test.ts",
       "**/*.spec.ts"
     ]
+  },
+  "dependencies": {
+    "zod": "^3.24.4"
   }
 }
