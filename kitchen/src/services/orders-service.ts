@@ -5,7 +5,9 @@ import { RECIPES } from "../models/recipe";
 import { Repository } from "./interfaces/repository";
 
 export class OrdersService {
-  constructor(private readonly ordersRepository: Repository<Order>) {}
+  constructor(private readonly ordersRepository: Repository<Order>) {
+    //listen kafka event and trigger prepareDish
+  }
 
   public async createOrder({
     dishesQuantityRequested,
@@ -33,6 +35,12 @@ export class OrdersService {
     };
 
     await this.ordersRepository.create(order);
+    selectedDishes.forEach((dish) => {
+      this.requestIngredients({
+        dishId: dish.id,
+        ingredients: dish.recipe.ingredients,
+      });
+    });
 
     return order;
   }
@@ -57,6 +65,7 @@ export class OrdersService {
     dishId: string;
     ingredients: Ingredient[];
   }): void {
+    // triggers kafka event
     // TODO: take the ingredients and send through SQS a message to the warehouse to fulfill the ingredients.
     // TODO: this is an async message to the warehouse microservice.
   }
