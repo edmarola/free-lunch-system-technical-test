@@ -26,5 +26,6 @@ export const IngredientName: Record<string, IngredientName> = {
 export interface Ingredient {
   id: string;
   name: IngredientName;
-  quantity: number;
+  totalStock: number;
+  lockedStock: number;
 }

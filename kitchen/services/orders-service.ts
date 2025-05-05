@@ -1,0 +1,63 @@
+import { Dish, DishStatus } from "../models/dish";
+import { Ingredient } from "../models/ingredient";
+import { Order, OrderStatus } from "../models/order";
+import { RECIPES } from "../models/recipe";
+import { Repository } from "./interfaces/repository";
+
+export class OrdersService {
+  constructor(private readonly ordersRepository: Repository<Order>) {}
+
+  public async createOrder({
+    dishesQuantityRequested,
+  }: {
+    dishesQuantityRequested: number;
+  }): Promise<Order> {
+    let selectedDishes: Dish[] = [];
+    for (let i = 0; i < dishesQuantityRequested; i++) {
+      const randomIndex = Math.floor(Math.random() * RECIPES.length);
+      const recipe = RECIPES[randomIndex];
+      const dish: Dish = {
+        id: crypto.randomUUID(),
+        status: DishStatus.PENDING,
+        recipe,
+      };
+      selectedDishes.push(dish);
+    }
+
+    const order: Order = {
+      id: crypto.randomUUID(),
+      status: OrderStatus.PENDING,
+      dishesTotal: dishesQuantityRequested,
+      dishesCompleted: 0,
+      dishes: selectedDishes,
+    };
+
+    await this.ordersRepository.create(order);
+
+    return order;
+  }
+
+  public async getOrders(
+    filter: Partial<Record<keyof Order, any>>
+  ): Promise<Order[]> {
+    return await this.ordersRepository.findAll();
+  }
+
+  public prepareDish({ dishId }: { dishId: string }): void {
+    // TODO: this is used when the event fulfiledIngredients is received.
+    // TODO: when the ingredients are fulfilled then the dish is marked as READY
+    // TODO: and the dishCompleted field is incremented by one.
+    // TODO: IF dishCompleted is equal to dishTotal then the dish is marked as COMPLETED
+  }
+
+  public requestIngredients({
+    dishId,
+    ingredients,
+  }: {
+    dishId: string;
+    ingredients: Ingredient[];
+  }): void {
+    // TODO: take the ingredients and send through SQS a message to the warehouse to fulfill the ingredients.
+    // TODO: this is an async message to the warehouse microservice.
+  }
+}
