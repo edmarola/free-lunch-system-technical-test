@@ -38,7 +38,7 @@ export class OrdersService {
   }
 
   public async getOrders(
-    filter: Partial<Record<keyof Order, any>>
+    filter?: Partial<Record<keyof Order, any>>
   ): Promise<Order[]> {
     return await this.ordersRepository.findAll();
   }

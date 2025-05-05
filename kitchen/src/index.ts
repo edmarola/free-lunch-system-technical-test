@@ -1,1 +1,3 @@
-console.log("Hello, world! changed");
+import { bootstrap } from "./application/server";
+
+bootstrap();
