@@ -50,7 +50,7 @@ export class OrdersService {
       createdAt: Date.now(),
     };
 
-    await this.ordersRepository.create(order);
+    await this.ordersRepository.create({ item: order });
     selectedDishes.forEach((dish) => {
       this.requestIngredients({
         userId: order.userId,
@@ -77,13 +77,41 @@ export class OrdersService {
     orderId: string;
     dishId: string;
   }): Promise<void> {
-    console.log(
-      `Preparing dish ${dishId} for user ${userId} and order ${orderId}`
-    );
-    // TODO: this is used when the event fulfiledIngredients is received.
-    // TODO: when the ingredients are fulfilled then the dish is marked as READY
-    // TODO: and the dishCompleted field is incremented by one.
-    // TODO: IF dishCompleted is equal to dishTotal then the dish is marked as COMPLETED
+    try {
+      console.log(
+        `Preparing dish ${dishId} for user ${userId} and order ${orderId}`
+      );
+      const order = await this.ordersRepository.findById({
+        userId,
+        id: orderId,
+      });
+      if (!order) {
+        console.error(`Order ${orderId} not found`);
+      } else {
+        const dish = order.dishes.find((dish) => dish.id === dishId);
+        if (!dish) {
+          console.error(`Dish ${dishId} not found`);
+        } else {
+          if (dish.status === DishStatus.PENDING) {
+            dish.status = DishStatus.COMPLETED;
+            order.dishesCompleted += 1;
+            if (order.dishesCompleted === order.dishesTotal) {
+              order.status = OrderStatus.COMPLETED;
+            }
+            await this.ordersRepository.update({
+              userId,
+              id: orderId,
+              item: order,
+            });
+          }
+          console.log(`Dish ${dishId} is ready`);
+        }
+      }
+    } catch (error) {
+      console.log(
+        `Error preparing dish ${dishId} for user ${userId} and order ${orderId}: ${error}`
+      );
+    }
   }
 
   private requestIngredients({
