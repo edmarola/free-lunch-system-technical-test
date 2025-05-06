@@ -76,7 +76,7 @@ export class OrdersService {
     userId: string;
     orderId: string;
     dishId: string;
-  }): Promise<void> {
+  }): Promise<Order | undefined> {
     try {
       console.log(
         `Preparing dish ${dishId} for user ${userId} and order ${orderId}`
@@ -98,7 +98,7 @@ export class OrdersService {
             if (order.dishesCompleted === order.dishesTotal) {
               order.status = OrderStatus.COMPLETED;
             }
-            await this.ordersRepository.update({
+            return await this.ordersRepository.update({
               userId,
               id: orderId,
               item: order,
