@@ -15,8 +15,8 @@ export const bootstrap = async () => {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.setHeader("Content-Type", "application/json");
 
-    try {
-      if (req.method === "GET") {
+    if (req.method === "GET") {
+      try {
         const url = new URL(req.url || "", `http://${req.headers.host}`);
         if (url.pathname === "/kitchen/orders") {
           const orders = await ordersService.getOrders();
@@ -30,68 +30,68 @@ export const bootstrap = async () => {
           res.writeHead(404);
           res.end(JSON.stringify({ message: "Not Found" }));
         }
-      } else if (req.method === "POST") {
-        if (req.url === "/kitchen/orders") {
-          let body = "";
-          req.on("data", (chunk) => {
-            body += chunk.toString();
-          });
-          req.on("end", async () => {
-            if (req.headers["content-type"] === "application/json") {
-              try {
-                const jsonBody = JSON.parse(body);
-                const data = OrderSchema.parse(jsonBody);
-                const { dishesQuantity } = data!;
-                await ordersService.createOrder({ dishesQuantity });
-                res.writeHead(201);
-                res.end(JSON.stringify({ message: "Order created" }));
-              } catch (error) {
-                if (error instanceof SyntaxError) {
-                  res.writeHead(400, { "Content-Type": "application/json" });
-                  res.end(
-                    JSON.stringify({
-                      message: "Invalid JSON",
-                    })
-                  );
-                } else if (error instanceof ZodError) {
-                  res.writeHead(400);
-                  res.end(
-                    JSON.stringify({
-                      message: "Bad request",
-                      description: error.format(),
-                    })
-                  );
-                } else {
-                  res.writeHead(500);
-                  res.end(JSON.stringify({ message: "Internal Server Error" }));
-                }
-              }
-            } else {
-              res.writeHead(415, { "Content-Type": "application/json" });
-              res.end(
-                JSON.stringify({
-                  message: "Unsupported Media Type: Only JSON accepted",
-                })
-              );
-            }
-          });
-        } else {
-          res.writeHead(404);
-          res.end(JSON.stringify({ message: "Not Found" }));
-        }
-      } else if (req.method === "OPTIONS") {
-        res.writeHead(204);
-        res.end();
-      } else {
-        res.writeHead(405);
-        res.end(JSON.stringify({ message: "Method Not Allowed" }));
+      } catch (error) {
+        console.error(error);
+        res.writeHead(500);
+        res.end(JSON.stringify({ message: "Internal Server Error" }));
       }
-    } catch (error) {
-      console.error(error);
-      res.writeHead(500);
-      res.end(JSON.stringify({ message: "Internal Server Error" }));
+    } else if (req.method === "POST") {
+      if (req.url === "/kitchen/orders") {
+        let body = "";
+        req.on("data", (chunk) => {
+          body += chunk.toString();
+        });
+        req.on("end", async () => {
+          if (req.headers["content-type"] === "application/json") {
+            try {
+              const jsonBody = JSON.parse(body);
+              const data = OrderSchema.parse(jsonBody);
+              const { dishesQuantity } = data!;
+              const order = await ordersService.createOrder({ dishesQuantity });
+              res.writeHead(201);
+              res.end(JSON.stringify({ data: order }));
+            } catch (error) {
+              if (error instanceof SyntaxError) {
+                res.writeHead(400, { "Content-Type": "application/json" });
+                res.end(
+                  JSON.stringify({
+                    message: "Invalid JSON",
+                  })
+                );
+              } else if (error instanceof ZodError) {
+                res.writeHead(400);
+                res.end(
+                  JSON.stringify({
+                    message: "Bad request",
+                    description: error.format(),
+                  })
+                );
+              } else {
+                console.log(error);
+                res.writeHead(500);
+                res.end(JSON.stringify({ message: "Internal Server Error" }));
+              }
+            }
+          } else {
+            res.writeHead(415, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({
+                message: "Unsupported Media Type: Only JSON accepted",
+              })
+            );
+          }
+        });
+      } else {
+        res.writeHead(404);
+        res.end(JSON.stringify({ message: "Not Found" }));
+      }
+    } else if (req.method === "OPTIONS") {
+      res.writeHead(204);
+      res.end();
+    } else {
+      res.writeHead(405);
+      res.end(JSON.stringify({ message: "Method Not Allowed" }));
     }
-
     // status codes: 200, 201, 204, 400, 404, 405, 415, 500
   }).listen(3000, () => {
     console.log("Server is running on port 3000");

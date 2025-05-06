@@ -3,8 +3,11 @@ import { Ingredient } from "../models/ingredient";
 import { Order, OrderStatus } from "../models/order";
 import { RECIPES } from "../models/recipe";
 import { Repository } from "./interfaces/repository";
+import { USER_ID } from "@/constants";
 
 export class OrdersService {
+  // TODO: Filter by real userId logged into the system.
+
   constructor(private readonly ordersRepository: Repository<Order>) {
     //listen kafka event and trigger prepareDish
   }
@@ -27,11 +30,13 @@ export class OrdersService {
     }
 
     const order: Order = {
-      id: crypto.randomUUID(),
+      userId: USER_ID,
+      orderId: crypto.randomUUID(),
       status: OrderStatus.PENDING,
       dishesTotal: dishesQuantity,
       dishesCompleted: 0,
       dishes: selectedDishes,
+      createdAt: Date.now(),
     };
 
     await this.ordersRepository.create(order);

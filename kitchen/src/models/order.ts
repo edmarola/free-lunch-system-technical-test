@@ -8,8 +8,10 @@ export const OrderStatus: Record<string, OrderStatus> = {
 };
 
 export interface Order {
-  id: string;
+  userId: string;
+  orderId: string;
   status: OrderStatus;
+  createdAt: number;
   dishesTotal: number;
   dishesCompleted: number;
   dishes: Dish[];

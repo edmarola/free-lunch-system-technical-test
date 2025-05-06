@@ -32,6 +32,8 @@
     ]
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.803.0",
+    "@aws-sdk/lib-dynamodb": "^3.803.0",
     "zod": "^3.24.4"
   }
 }
