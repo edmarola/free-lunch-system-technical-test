@@ -53,7 +53,7 @@ export class OrdersService {
   public async getOrders(
     filter?: Partial<Record<keyof Order, any>>
   ): Promise<Order[]> {
-    return await this.ordersRepository.findAll();
+    return await this.ordersRepository.findAll(filter);
   }
 
   public prepareDish({ dishId }: { dishId: string }): void {

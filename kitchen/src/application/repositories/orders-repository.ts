@@ -1,11 +1,12 @@
 import { USER_ID } from "@/constants";
-import { Order } from "@/models/order";
+import { Order, OrderStatus } from "@/models/order";
 import { Repository } from "@/services/interfaces/repository";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
   PutCommand,
   QueryCommand,
+  QueryCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 
 const client = new DynamoDBClient({});
@@ -34,14 +35,29 @@ export class OrdersRepository implements Repository<Order> {
   async findAll(
     filter?: Partial<Record<keyof Order, any>> | undefined
   ): Promise<Order[]> {
-    const command = new QueryCommand({
+    const params: QueryCommandInput = {
       TableName: this.tableName,
+      IndexName: "userId-createdAt-index",
       KeyConditionExpression: "userId = :userId",
+      ExpressionAttributeNames: {
+        "#status": "status",
+      },
       ExpressionAttributeValues: {
         ":userId": USER_ID,
       },
       ScanIndexForward: false,
-    });
+    };
+
+    if (filter?.status) {
+      params["FilterExpression"] = "#status = :status";
+      params.ExpressionAttributeValues![":status"] = filter.status;
+    } else {
+      params["FilterExpression"] = "#status IN (:pending, :completed)";
+      params.ExpressionAttributeValues![":pending"] = OrderStatus.PENDING;
+      params.ExpressionAttributeValues![":completed"] = OrderStatus.COMPLETED;
+    }
+
+    const command = new QueryCommand(params);
     const { Items } = await docClient.send(command);
     return Items as Order[];
   }

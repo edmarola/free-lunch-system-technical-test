@@ -4,6 +4,7 @@ import { OrdersRepository } from "@/application/repositories/orders-repository";
 import { OrderSchema } from "@/application/schemas/order-schema";
 import { createServer } from "http";
 import { ZodError } from "zod";
+import { Order, OrderStatus } from "@/models/order";
 
 export const bootstrap = async () => {
   const ordersService = new OrdersService(new OrdersRepository());
@@ -19,7 +20,24 @@ export const bootstrap = async () => {
       try {
         const url = new URL(req.url || "", `http://${req.headers.host}`);
         if (url.pathname === "/kitchen/orders") {
-          const orders = await ordersService.getOrders();
+          let filter: Partial<Record<keyof Order, any>> = {};
+          const status = url.searchParams.get("status");
+          if (status) {
+            if (
+              status !== OrderStatus.PENDING &&
+              status !== OrderStatus.COMPLETED
+            ) {
+              res.writeHead(400);
+              res.end(
+                JSON.stringify({
+                  message:
+                    "Invalid status filter. Allowed values are PENDING or COMPLETED.",
+                })
+              );
+            }
+            filter.status = status as OrderStatus;
+          }
+          const orders = await ordersService.getOrders(filter);
           res.writeHead(200);
           res.end(JSON.stringify(orders));
         } else if (url.pathname === "/kitchen/recipes") {
