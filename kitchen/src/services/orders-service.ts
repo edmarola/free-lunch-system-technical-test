@@ -2,14 +2,25 @@ import { Dish, DishStatus } from "../models/dish";
 import { Ingredient } from "../models/ingredient";
 import { Order, OrderStatus } from "../models/order";
 import { RECIPES } from "../models/recipe";
+import { EventHandler } from "./interfaces/event-handler";
 import { Repository } from "./interfaces/repository";
 import { USER_ID } from "@/constants";
 
 export class OrdersService {
   // TODO: Filter by real userId logged into the system.
 
-  constructor(private readonly ordersRepository: Repository<Order>) {
-    //listen kafka event and trigger prepareDish
+  constructor(
+    private readonly ordersRepository: Repository<Order>,
+    private readonly ordersEventHandler: EventHandler
+  ) {
+    this.ordersEventHandler.receive({
+      queue:
+        "https://sqs.us-east-1.amazonaws.com/181939780845/fulfilledIngredients",
+      callback: (payload) => {
+        const { dishId, userId, orderId } = JSON.parse(payload);
+        this.prepareDish({ dishId, userId, orderId });
+      },
+    });
   }
 
   public async createOrder({
@@ -42,11 +53,12 @@ export class OrdersService {
     await this.ordersRepository.create(order);
     selectedDishes.forEach((dish) => {
       this.requestIngredients({
+        userId: order.userId,
+        orderId: order.orderId,
         dishId: dish.id,
         ingredients: dish.recipe.ingredients,
       });
     });
-
     return order;
   }
 
@@ -56,22 +68,44 @@ export class OrdersService {
     return await this.ordersRepository.findAll(filter);
   }
 
-  public prepareDish({ dishId }: { dishId: string }): void {
+  public async prepareDish({
+    userId,
+    orderId,
+    dishId,
+  }: {
+    userId: string;
+    orderId: string;
+    dishId: string;
+  }): Promise<void> {
+    console.log(
+      `Preparing dish ${dishId} for user ${userId} and order ${orderId}`
+    );
     // TODO: this is used when the event fulfiledIngredients is received.
     // TODO: when the ingredients are fulfilled then the dish is marked as READY
     // TODO: and the dishCompleted field is incremented by one.
     // TODO: IF dishCompleted is equal to dishTotal then the dish is marked as COMPLETED
   }
 
-  public requestIngredients({
+  private requestIngredients({
+    userId,
+    orderId,
     dishId,
     ingredients,
   }: {
+    userId: string;
+    orderId: string;
     dishId: string;
     ingredients: Ingredient[];
   }): void {
-    // triggers kafka event
-    // TODO: take the ingredients and send through SQS a message to the warehouse to fulfill the ingredients.
-    // TODO: this is an async message to the warehouse microservice.
+    this.ordersEventHandler.send({
+      queue:
+        "https://sqs.us-east-1.amazonaws.com/181939780845/requestedIngredients.fifo", // TODO: change to env variable
+      data: {
+        userId,
+        orderId,
+        dishId,
+        ingredients,
+      },
+    });
   }
 }

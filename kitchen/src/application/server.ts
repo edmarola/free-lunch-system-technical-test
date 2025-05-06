@@ -5,9 +5,13 @@ import { OrderSchema } from "@/application/schemas/order-schema";
 import { createServer } from "http";
 import { ZodError } from "zod";
 import { Order, OrderStatus } from "@/models/order";
+import { OrdersEventHandler } from "./events/orders-event-handler";
 
 export const bootstrap = async () => {
-  const ordersService = new OrdersService(new OrdersRepository());
+  const ordersService = new OrdersService(
+    new OrdersRepository(),
+    new OrdersEventHandler()
+  );
   const recipesService = new RecipesService();
 
   createServer(async (req, res) => {
