@@ -9,7 +9,7 @@ export interface Recipe {
 const RECIPES: Recipe[] = [
   {
     id: "1",
-    name: "Tomato and Cheese Salad",
+    name: "Ensalada de Tomate y Queso",
     ingredients: [
       { name: IngredientName.Tomato, quantity: 2 },
       { name: IngredientName.Cheese, quantity: 1 },
@@ -19,7 +19,7 @@ const RECIPES: Recipe[] = [
   },
   {
     id: "2",
-    name: "Lemon Chicken",
+    name: "Pollo al Limón",
     ingredients: [
       { name: IngredientName.Chicken, quantity: 1 },
       { name: IngredientName.Lemon, quantity: 1 },
@@ -29,7 +29,7 @@ const RECIPES: Recipe[] = [
   },
   {
     id: "3",
-    name: "Potato and Meat Stew",
+    name: "Estofado de Papa y Carne",
     ingredients: [
       { name: IngredientName.Potato, quantity: 3 },
       { name: IngredientName.Meat, quantity: 2 },
@@ -39,7 +39,7 @@ const RECIPES: Recipe[] = [
   },
   {
     id: "4",
-    name: "Chicken and Rice Bowl",
+    name: "Tazón de Pollo y Arroz",
     ingredients: [
       { name: IngredientName.Chicken, quantity: 1 },
       { name: IngredientName.Rice, quantity: 2 },
@@ -49,7 +49,7 @@ const RECIPES: Recipe[] = [
   },
   {
     id: "5",
-    name: "Cheesy Meat Sandwich",
+    name: "Sándwich de Carne y Queso",
     ingredients: [
       { name: IngredientName.Meat, quantity: 1 },
       { name: IngredientName.Cheese, quantity: 1 },
@@ -59,7 +59,7 @@ const RECIPES: Recipe[] = [
   },
   {
     id: "6",
-    name: "Lemon Potato Salad",
+    name: "Ensalada de Papa al Limón",
     ingredients: [
       { name: IngredientName.Potato, quantity: 2 },
       { name: IngredientName.Lemon, quantity: 1 },

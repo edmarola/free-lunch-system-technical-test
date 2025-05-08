@@ -1,11 +1,455 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
+    <title>Sistema de Almuerzos Gratis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        main {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .column {
+            flex: 1;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            background-color: #f4f4f4;
+            flex: 1;
+            text-align: center;
+        }
+
+        .tab.active {
+            background-color: white;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        table th {
+            background-color: #f4f4f4;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 30%;
+            height: 100%;
+            background-color: #f9f9f9;
+            border-left: 1px solid #ddd;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .drawer.open {
+            display: block;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .drawer-header h3 {
+            margin: 0;
+        }
+
+        .drawer-close {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+        .dishes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .dishes-grid li {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .dishes-grid li.completed {
+            background-color: #d4edda; /* Light green for completed */
+        }
+
+        .dishes-grid li.pending {
+            background-color: #fff3cd; /* Light yellow for pending */
+        }
+
+        .dishes-grid li.in-progress {
+            background-color: #ffeeba; /* Light orange for in-progress */
+        }
+
+        .order-row.completed {
+            background-color: #d4edda; /* Light green for completed */
+        }
+
+        .order-row.pending {
+            background-color: #fff3cd; /* Light yellow for pending */
+        }
+
+        .order-row.in-progress {
+            background-color: #ffeeba; /* Light orange for in-progress */
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello, World!</h1>
+    <header>
+        <h1>Sistema de Almuerzos Gratis</h1>
+    </header>
+
+    <main>
+        <!-- Left Column -->
+        <div class="column">
+            <section>
+                <h2>Crear Nuevo Pedido</h2>
+                <form id="create-order-form">
+                    <label for="dishes-quantity">Cantidad de Platos:</label>
+                    <input type="number" id="dishes-quantity" name="dishesQuantity" min="1" required>
+                    <button type="submit">Crear Pedido</button>
+                </form>
+            </section>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="orders">Historial de pedidos realizados</div>
+                <div class="tab" data-tab="recipes">Recetas</div>
+            </div>
+
+            <div id="orders" class="tab-content active">
+                <h2>Historial de pedidos realizados</h2>
+                <label for="order-status-filter">Filtrar por Estado:</label>
+                <select id="order-status-filter">
+                    <option value="ALL">Todos</option>
+                    <option value="PENDING">Pendientes</option>
+                    <option value="COMPLETED">Completados</option>
+                </select>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Estado</th>
+                            <th>Fecha de Creación</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body">
+                        <!-- Orders will be dynamically populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="recipes" class="tab-content">
+                <h2>Recetas</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre de la Receta</th>
+                            <th>Ingredientes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recipes-table-body">
+                        <!-- Recipes will be dynamically populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="column">
+            <h2>Inventario</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre del Ingrediente</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody id="ingredients-table-body">
+                    <!-- Ingredients will be dynamically populated here -->
+                </tbody>
+            </table>
+
+            <h2>Historial de compras en la plaza de alimentos</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre del Ingrediente</th>
+                        <th>Cantidad</th>
+                        <th>Fecha de Compra</th>
+                    </tr>
+                </thead>
+                <tbody id="purchases-table-body">
+                    <!-- Purchases will be dynamically populated here -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Right-hand Drawer -->
+    <div id="order-drawer" class="drawer">
+        <div class="drawer-header">
+            <h3>Detalles del Pedido</h3>
+            <button class="drawer-close" onclick="closeDrawer()">×</button>
+        </div>
+        <div id="drawer-content">
+            <!-- Dishes grid will be dynamically populated here -->
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Sistema de Almuerzos Gratis</p>
+    </footer>
+
+    <script>
+        let currentOrderId = null; // Track the currently opened order in the drawer
+
+        // Tab functionality
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and contents
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // Add active class to the clicked tab and corresponding content
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Fetch and populate orders
+        const fetchAndPopulateOrders = async () => {
+            const statusFilter = document.getElementById("order-status-filter").value;
+            const url = statusFilter === "ALL" 
+                ? "http://localhost/kitchen/orders" 
+                : `http://localhost/kitchen/orders?status=${statusFilter}`;
+            const response = await fetch(url);
+            const orders = await response.json();
+            const tbody = document.getElementById("orders-table-body");
+            tbody.innerHTML = ""; // Clear existing rows
+            orders.forEach(order => {
+                const row = document.createElement("tr");
+                row.className = `order-row ${order.status.toLowerCase()}`; // Add class based on status
+                row.innerHTML = `
+                    <td>${order.status}</td>
+                    <td>${new Date(order.createdAt).toLocaleString()}</td>
+                    <td>
+                        <button class="view-details" data-order-id="${order.orderId}">Ver Detalles</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Add event listeners for opening the drawer
+            document.querySelectorAll('.view-details').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const orderId = event.target.dataset.orderId;
+                    const order = orders.find(o => o.orderId === orderId);
+                    openDrawer(order);
+                });
+            });
+
+            // If a specific order is open in the drawer, refresh its dishes
+            if (currentOrderId) {
+                const currentOrder = orders.find(o => o.orderId === currentOrderId);
+                if (currentOrder) {
+                    updateDrawerContent(currentOrder);
+                }
+            }
+        };
+
+        // Open the drawer and display the dishes for the selected order
+        const openDrawer = (order) => {
+            currentOrderId = order.orderId; // Track the currently opened order
+            const drawer = document.getElementById("order-drawer");
+            updateDrawerContent(order);
+            drawer.classList.add("open");
+        };
+
+        // Update the drawer content with the dishes of the given order
+        const updateDrawerContent = (order) => {
+            const drawerContent = document.getElementById("drawer-content");
+            drawerContent.innerHTML = `
+                <ul class="dishes-grid">
+                    ${order.dishes.map(dish => `
+                        <li class="${dish.status.toLowerCase()}">
+                            <strong>${dish.recipe.name}</strong> (${dish.status})
+                            <ul>
+                                ${dish.recipe.ingredients.map(ingredient => `
+                                    <li>${ingredient.name}: ${ingredient.quantity}</li>
+                                `).join("")}
+                            </ul>
+                        </li>
+                    `).join("")}
+                </ul>
+            `;
+        };
+
+        // Close the drawer
+        const closeDrawer = () => {
+            const drawer = document.getElementById("order-drawer");
+            drawer.classList.remove("open");
+            currentOrderId = null; // Clear the currently opened order
+        };
+
+        // Fetch and populate recipes
+        const fetchAndPopulateRecipes = async () => {
+            const response = await fetch("http://localhost/kitchen/recipes");
+            const recipes = await response.json();
+            const tbody = document.getElementById("recipes-table-body");
+            tbody.innerHTML = ""; // Clear existing rows
+            recipes.forEach(recipe => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${recipe.name}</td>
+                    <td>
+                        <ul>
+                            ${recipe.ingredients.map(ingredient => `
+                                <li>${ingredient.name}: ${ingredient.quantity}</li>
+                            `).join("")}
+                        </ul>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        };
+
+        // Fetch and populate ingredients
+        const fetchAndPopulateIngredients = async () => {
+            const response = await fetch("http://localhost/warehouse/ingredients");
+            const ingredients = await response.json();
+            const tbody = document.getElementById("ingredients-table-body");
+            tbody.innerHTML = ""; // Clear existing rows
+            ingredients.forEach(ingredient => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${ingredient.name}</td>
+                    <td>${ingredient.stock}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        };
+
+        // Fetch and populate purchases
+        const fetchAndPopulatePurchases = async () => {
+            const response = await fetch("http://localhost/warehouse/purchases");
+            const purchases = await response.json();
+            const tbody = document.getElementById("purchases-table-body");
+            tbody.innerHTML = ""; // Clear existing rows
+            
+            purchases.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(purchase => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${purchase.ingredientName}</td>
+                    <td>${purchase.quantity}</td>
+                    <td>${new Date(purchase.createdAt).toLocaleString()}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        };
+
+        // Create a new order
+        const createOrder = async (event) => {
+            event.preventDefault();
+            const dishesQuantity = document.getElementById("dishes-quantity").value;
+            const response = await fetch("http://localhost/kitchen/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ dishesQuantity: parseInt(dishesQuantity) })
+            });
+            if (response.ok) {
+                alert("Pedido creado exitosamente!");
+                document.getElementById("dishes-quantity").value = ""; // Clear input field
+                fetchAndPopulateOrders();
+            } else {
+                alert("Error al crear el pedido.");
+            }
+        };
+
+        document.getElementById("create-order-form").addEventListener("submit", createOrder);
+        document.getElementById("order-status-filter").addEventListener("change", fetchAndPopulateOrders);
+
+        // Initial population
+        fetchAndPopulateOrders();
+        fetchAndPopulateRecipes();
+        fetchAndPopulateIngredients();
+        fetchAndPopulatePurchases();
+
+        // Set intervals for refreshing data every 1 second
+        setInterval(fetchAndPopulateOrders, 1000);
+        setInterval(fetchAndPopulateRecipes, 1000);
+        setInterval(fetchAndPopulateIngredients, 1000);
+        setInterval(fetchAndPopulatePurchases, 1000);
+    </script>
 </body>
 </html>
