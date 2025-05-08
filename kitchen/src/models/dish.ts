@@ -1,7 +1,7 @@
 import { Recipe } from "./recipe";
 
 export type DishStatus = "PENDING" | "COMPLETED";
-export const DishStatus: Record<string, DishStatus> = {
+export const DishStatus = {
   PENDING: "PENDING",
   COMPLETED: "COMPLETED",
 };

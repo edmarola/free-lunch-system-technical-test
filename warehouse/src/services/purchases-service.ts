@@ -1,44 +1,61 @@
-import { IngredientName } from "@/models/ingredient";
-import { Purchase } from "@/models/purchase";
+import { randomUUID } from "crypto";
+import { IngredientName } from "../models/ingredient";
+import { Purchase } from "../models/purchase";
+import { MarketProvider } from "./interfaces/market-provider";
+import { Mediator } from "./interfaces/mediator";
 import { Repository } from "./interfaces/repository";
+import { InventoryEvent } from "./types/inventory-event";
+import { IngredientsRequest } from "./interfaces/ingredients-request";
 
 export class PurchasesService {
-  constructor(private readonly purchasesRepository: Repository<Purchase>) {}
+  constructor(
+    private readonly purchasesRepository: Repository<Purchase>,
+    private readonly mediator: Mediator,
+    private readonly marketProvider: MarketProvider
+  ) {}
 
   public async getPurchases(): Promise<Purchase[]> {
     return await this.purchasesRepository.findAll();
   }
 
-  private async attemptPurchase(
-    ingredientName: IngredientName
-  ): Promise<{ qtySold: number }> {
-    return { qtySold: 0 }; // Replace 0 with the actual logic to determine qtySold
-  }
-
-  public async handlePurchase(
-    ingredientName: IngredientName
-  ): Promise<Purchase> {
-    // if fails retry with exponential backoff (use attemptPurchase)
-    // if success then create a purchase order
-    // !forget about locking, just make the purchase and then check ingredients again and if another left, purchase again and so on.
-    const purchase: Purchase = {
-      id: "",
-      date: new Date(),
-      ingredientName,
-      quantity: 0,
-    };
-    return purchase;
-  }
-
-  private async createPurchase(purchase: Purchase): Promise<Purchase> {
-    // TODO: this function is called only then the ingredients are not available in the warehouse.
-    // TODO: a request is sent to the farmers market API.
-    // TODO: this market api is a dependency inyected
-    // TODO: a record is created in the database for purchase order. If a retry is needed then
-    // TODO: the record is stored with the value ON HOLD, otherwise it is stored with the value COMPLETED
-    // TODO: when the retry finally completes, the record is updated with the value COMPLETED
-    return await this.purchasesRepository.create(purchase);
+  public async createPurchase({
+    request,
+    ingredient,
+  }: {
+    request: IngredientsRequest;
+    ingredient: IngredientName;
+  }): Promise<void> {
+    try {
+      let attempts = 0;
+      const attemptPurchase = async () => {
+        attempts++;
+        try {
+          const { qtySold } = await this.marketProvider.buy({ ingredient });
+          if (qtySold <= 0) {
+            setTimeout(attemptPurchase, attempts * 10000);
+          } else {
+            try {
+              await this.purchasesRepository.create({
+                purchaseId: randomUUID(),
+                createdAt: Date.now(),
+                ingredientName: ingredient,
+                quantity: qtySold,
+              });
+              this.mediator.send({
+                event: InventoryEvent.CHECK_INGREDIENTS,
+                data: { request },
+              });
+            } catch (error) {
+              console.error("Error storing purchase", error);
+            }
+          }
+        } catch (error) {
+          console.error("Error attempting purchase", error);
+        }
+      };
+      attemptPurchase();
+    } catch (error) {
+      console.error("Error creating purchase", error);
+    }
   }
 }
-
-export const createPurchaseOrder = (ingredients: string[]): void => {};

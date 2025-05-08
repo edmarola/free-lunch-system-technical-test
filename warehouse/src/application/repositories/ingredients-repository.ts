@@ -1,7 +1,10 @@
-import { Ingredient } from "@/models/ingredient";
-import { Repository } from "@/services/interfaces/repository";
+import { Ingredient } from "../../models/ingredient";
+import { Repository } from "../../services/interfaces/repository";
 
 export class IngredientsRepository implements Repository<Ingredient> {
+  updateMany(items: Ingredient[]): Promise<Ingredient[]> {
+    throw new Error("Method not implemented.");
+  }
   create(item: Ingredient): Promise<Ingredient> {
     throw new Error("Method not implemented.");
   }

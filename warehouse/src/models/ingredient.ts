@@ -10,7 +10,7 @@ export type IngredientName =
   | "Meat"
   | "Chicken";
 
-export const IngredientName: Record<string, IngredientName> = {
+export const IngredientName = {
   Tomato: "Tomato",
   Lemon: "Lemon",
   Potato: "Potato",
@@ -24,8 +24,6 @@ export const IngredientName: Record<string, IngredientName> = {
 };
 
 export interface Ingredient {
-  id: string;
   name: IngredientName;
-  totalStock: number;
-  lockedStock: number;
+  stock: number;
 }

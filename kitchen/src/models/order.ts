@@ -1,7 +1,7 @@
 import { Dish } from "./dish";
 
 export type OrderStatus = "PENDING" | "COMPLETED";
-export const OrderStatus: Record<string, OrderStatus> = {
+export const OrderStatus = {
   PENDING: "PENDING",
   COMPLETED: "COMPLETED",
 };

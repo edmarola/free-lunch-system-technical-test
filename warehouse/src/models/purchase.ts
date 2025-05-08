@@ -1,8 +1,8 @@
 import { IngredientName } from "./ingredient";
 
 export interface Purchase {
-  id: string;
-  date: Date;
+  purchaseId: string;
+  createdAt: number;
   ingredientName: IngredientName;
   quantity: number;
 }

@@ -10,7 +10,7 @@ export type IngredientName =
   | "Meat"
   | "Chicken";
 
-export const IngredientName: Record<string, IngredientName> = {
+export const IngredientName = {
   Tomato: "Tomato",
   Lemon: "Lemon",
   Potato: "Potato",
