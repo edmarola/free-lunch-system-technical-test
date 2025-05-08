@@ -1,19 +1,19 @@
-version: "3.8"
-
 services:
   kitchen:
-    image: kitchen-service:latest
+    build:
+      context: ./kitchen
     container_name: kitchen-service
-    ports:
-      - "5001:5001"
+    volumes:
+      - ~/.aws:/root/.aws:ro
     networks:
       - app-network
 
   warehouse:
-    image: warehouse-service:latest
+    build:
+      context: ./warehouse
     container_name: warehouse-service
-    ports:
-      - "5002:5002"
+    volumes:
+      - ~/.aws:/root/.aws:ro
     networks:
       - app-network
 
