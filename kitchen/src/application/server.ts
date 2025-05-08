@@ -6,6 +6,7 @@ import { createServer } from "http";
 import { ZodError } from "zod";
 import { Order, OrderStatus } from "@/models/order";
 import { OrdersEventHandler } from "./events/orders-event-handler";
+import { config } from "@/config";
 
 export const bootstrap = async () => {
   const ordersService = new OrdersService(
@@ -115,7 +116,7 @@ export const bootstrap = async () => {
       res.end(JSON.stringify({ message: "Method Not Allowed" }));
     }
     // status codes: 200, 201, 204, 400, 404, 405, 415, 500
-  }).listen(3000, () => {
-    console.log("Server is running on port 3000");
+  }).listen(config.PORT, () => {
+    console.log("Server is running on port " + config.PORT);
   });
 };

@@ -6,14 +6,13 @@ import { IngredientsService } from "../services/ingredients-service";
 import { IngredientsRepository } from "./repositories/ingredients-repository";
 import { MarketApiAdapter } from "./adapters/market-api-adapter";
 import { PurchasesRepository } from "./repositories/purchases-repository";
+import { config } from "../config";
 
 export const bootstrap = async () => {
   const inventoryService = new InventoryService();
   const purchasesService = new PurchasesService({
     mediator: inventoryService,
-    market: new MarketApiAdapter(
-      "https://recruitment.alegra.com/api/farmers-market/buy" // TODO: move to env
-    ),
+    market: new MarketApiAdapter(config.MARKET_API_URL),
     purchasesRepository: new PurchasesRepository(),
   });
   const ingredientsService = new IngredientsService({
@@ -57,7 +56,7 @@ export const bootstrap = async () => {
     }
 
     // status codes: 200, 201, 204, 400, 404, 405, 500
-  }).listen(3001, () => {
-    console.log("Server is running on port 3001");
+  }).listen(config.PORT, () => {
+    console.log("Server is running on port " + config.PORT);
   });
 };

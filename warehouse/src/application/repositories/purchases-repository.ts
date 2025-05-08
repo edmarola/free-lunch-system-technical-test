@@ -1,7 +1,10 @@
+import { config } from "../../config";
 import { Purchase } from "../../models/purchase";
 import { Repository } from "../../services/interfaces/repository";
 
 export class PurchasesRepository implements Repository<Purchase> {
+  private tableName = config.PURCHASES_TABLE;
+
   findAll(
     filter?: Partial<Record<keyof Purchase, any>> | undefined
   ): Promise<Purchase[]> {

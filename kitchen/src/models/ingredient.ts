@@ -21,7 +21,7 @@ export const IngredientName = {
   Cheese: "Cheese",
   Meat: "Meat",
   Chicken: "Chicken",
-};
+} as const;
 
 export interface Ingredient {
   name: IngredientName;

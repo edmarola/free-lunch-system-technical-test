@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import { USER_ID } from "@/constants";
 import { Order, OrderStatus } from "@/models/order";
 import { Repository } from "@/services/interfaces/repository";
@@ -17,7 +18,7 @@ const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
 export class OrdersRepository implements Repository<Order> {
-  private tableName = "orders";
+  private tableName: string = config.ORDERS_TABLE;
 
   async create({ item: order }: { item: Order }): Promise<Order> {
     const command = new PutCommand({

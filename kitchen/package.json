@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "build": "tsc",
-    "start": "node -r ts-node/register/transpile-only -r tsconfig-paths/register ./dist/src/index.js",
+    "start": "node -r ts-node/register/transpile-only -r tsconfig-paths/register src/index.ts",
     "dev": "nodemon src/index.ts",
     "test": "jest"
   },
@@ -38,6 +38,7 @@
     "@aws-sdk/client-dynamodb": "^3.803.0",
     "@aws-sdk/client-sqs": "^3.803.0",
     "@aws-sdk/lib-dynamodb": "^3.803.0",
+    "dotenv": "^16.5.0",
     "zod": "^3.24.4"
   }
 }

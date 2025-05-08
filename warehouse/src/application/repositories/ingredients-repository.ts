@@ -1,7 +1,10 @@
+import { config } from "../../config";
 import { Ingredient } from "../../models/ingredient";
 import { Repository } from "../../services/interfaces/repository";
 
 export class IngredientsRepository implements Repository<Ingredient> {
+  private tableName: string = config.INGREDIENTS_TABLE;
+
   findAllByIds(ids: string[]): Promise<Ingredient[]> {
     throw new Error("Method not implemented.");
   }

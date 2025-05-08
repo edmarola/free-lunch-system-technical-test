@@ -1,3 +1,4 @@
+import { config } from "@/config";
 import { Dish, DishStatus } from "../models/dish";
 import { Ingredient } from "../models/ingredient";
 import { Order, OrderStatus } from "../models/order";
@@ -5,17 +6,15 @@ import { RECIPES } from "../models/recipe";
 import { EventHandler } from "./interfaces/event-handler";
 import { Repository } from "./interfaces/repository";
 import { USER_ID } from "@/constants";
+// TODO: Filter by real userId logged into the system.
 
 export class OrdersService {
-  // TODO: Filter by real userId logged into the system.
-
   constructor(
     private readonly ordersRepository: Repository<Order>,
     private readonly ordersEventHandler: EventHandler
   ) {
     this.ordersEventHandler.receive({
-      queue:
-        "https://sqs.us-east-1.amazonaws.com/181939780845/fulfilledIngredients",
+      queue: config.FULFILLED_INGREDIENTS_QUEUE_URL,
       callback: (payload) => {
         const { dishId, userId, orderId } = JSON.parse(payload);
         this.prepareDish({ dishId, userId, orderId });
@@ -126,8 +125,7 @@ export class OrdersService {
     ingredients: Ingredient[];
   }): void {
     this.ordersEventHandler.send({
-      queue:
-        "https://sqs.us-east-1.amazonaws.com/181939780845/requestedIngredients.fifo", // TODO: change to env variable
+      queue: config.REQUESTED_INGREDIENTS_QUEUE_URL,
       data: {
         userId,
         orderId,

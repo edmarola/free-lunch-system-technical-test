@@ -4,7 +4,7 @@ export type OrderStatus = "PENDING" | "COMPLETED";
 export const OrderStatus = {
   PENDING: "PENDING",
   COMPLETED: "COMPLETED",
-};
+} as const;
 
 export interface Order {
   userId: string;

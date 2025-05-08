@@ -1,3 +1,4 @@
+import { config } from "../config";
 import { Ingredient, IngredientName } from "../models/ingredient";
 import { EventHandler } from "./interfaces/event-handler";
 import { IngredientsRequest } from "./interfaces/ingredients-request";
@@ -23,8 +24,7 @@ export class IngredientsService {
     this.mediator = mediator;
     this.ingredientsEventHandler = ingredientsEventHandler;
     this.ingredientsEventHandler.receive({
-      queue:
-        "https://sqs.us-east-1.amazonaws.com/181939780845/requestedIngredients.fifo", // TODO: change to env variable
+      queue: config.REQUESTED_INGREDIENTS_QUEUE_URL,
       callback: (payload) => {
         const data = JSON.parse(payload);
         this.checkIngredients(data as IngredientsRequest);
@@ -63,8 +63,7 @@ export class IngredientsService {
     if (!missingIngredient) {
       this.ingredientsRepository.updateMany(ingredientsToUpdate);
       this.ingredientsEventHandler.send({
-        queue:
-          "https://sqs.us-east-1.amazonaws.com/181939780845/fulfilledIngredients", // TODO: change to env variable
+        queue: config.FULFILLED_INGREDIENTS_QUEUE_URL,
         data: JSON.stringify(request),
       });
     }
