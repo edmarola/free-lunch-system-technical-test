@@ -2,6 +2,9 @@ import { Ingredient } from "../../models/ingredient";
 import { Repository } from "../../services/interfaces/repository";
 
 export class IngredientsRepository implements Repository<Ingredient> {
+  findAllByIds(ids: string[]): Promise<Ingredient[]> {
+    throw new Error("Method not implemented.");
+  }
   updateMany(items: Ingredient[]): Promise<Ingredient[]> {
     throw new Error("Method not implemented.");
   }

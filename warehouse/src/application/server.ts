@@ -1,11 +1,26 @@
-import { RecipesService } from "@/services/recipes-service";
-import { OrdersService } from "@/services/orders-service";
-import { OrdersRepository } from "@/application/repositories/orders-repository";
 import { createServer } from "http";
+import { InventoryService } from "../services/inventory-service";
+import { PurchasesService } from "../services/purchases-service";
+import { IngredientsEventHandler } from "./events/ingredients-event-handler";
+import { IngredientsService } from "../services/ingredients-service";
+import { IngredientsRepository } from "./repositories/ingredients-repository";
+import { MarketApiAdapter } from "./adapters/market-api-adapter";
+import { PurchasesRepository } from "./repositories/purchases-repository";
 
 export const bootstrap = async () => {
-  const ordersService = new OrdersService(new OrdersRepository());
-  const recipesService = new RecipesService();
+  const inventoryService = new InventoryService();
+  const purchasesService = new PurchasesService({
+    mediator: inventoryService,
+    market: new MarketApiAdapter(
+      "https://recruitment.alegra.com/api/farmers-market/buy" // TODO: move to env
+    ),
+    purchasesRepository: new PurchasesRepository(),
+  });
+  const ingredientsService = new IngredientsService({
+    mediator: inventoryService,
+    ingredientsRepository: new IngredientsRepository(),
+    ingredientsEventHandler: new IngredientsEventHandler(),
+  });
 
   createServer(async (req, res) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -17,13 +32,13 @@ export const bootstrap = async () => {
       if (req.method === "GET") {
         const url = new URL(req.url || "", `http://${req.headers.host}`);
         if (url.pathname === "/warehouse/purchases") {
-          const orders = await ordersService.getOrders();
+          const purchases = await purchasesService.getPurchases();
           res.writeHead(200);
-          res.end(JSON.stringify(orders));
+          res.end(JSON.stringify(purchases));
         } else if (url.pathname === "/warehouse/ingredients") {
-          const recipes = await recipesService.getRecipes();
+          const ingredients = await ingredientsService.getIngredients;
           res.writeHead(200);
-          res.end(JSON.stringify(recipes));
+          res.end(JSON.stringify(ingredients));
         } else {
           res.writeHead(404);
           res.end(JSON.stringify({ message: "Not Found" }));

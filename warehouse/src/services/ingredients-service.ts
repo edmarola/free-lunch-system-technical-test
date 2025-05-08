@@ -1,14 +1,36 @@
 import { Ingredient, IngredientName } from "../models/ingredient";
+import { EventHandler } from "./interfaces/event-handler";
 import { IngredientsRequest } from "./interfaces/ingredients-request";
 import { Mediator } from "./interfaces/mediator";
 import { Repository } from "./interfaces/repository";
 import { InventoryEvent } from "./types/inventory-event";
 
 export class IngredientsService {
-  constructor(
-    private readonly ingredientsRepository: Repository<Ingredient>,
-    private readonly mediator: Mediator
-  ) {}
+  private readonly ingredientsRepository: Repository<Ingredient>;
+  private readonly mediator: Mediator;
+  private readonly ingredientsEventHandler: EventHandler;
+
+  constructor({
+    ingredientsRepository,
+    mediator,
+    ingredientsEventHandler,
+  }: {
+    ingredientsRepository: Repository<Ingredient>;
+    mediator: Mediator;
+    ingredientsEventHandler: EventHandler;
+  }) {
+    this.ingredientsRepository = ingredientsRepository;
+    this.mediator = mediator;
+    this.ingredientsEventHandler = ingredientsEventHandler;
+    this.ingredientsEventHandler.receive({
+      queue:
+        "https://sqs.us-east-1.amazonaws.com/181939780845/requestedIngredients.fifo", // TODO: change to env variable
+      callback: (payload) => {
+        const data = JSON.parse(payload);
+        this.checkIngredients(data as IngredientsRequest);
+      },
+    });
+  }
 
   public async getIngredients(): Promise<Ingredient[]> {
     return this.ingredientsRepository.findAll();
@@ -28,6 +50,7 @@ export class IngredientsService {
     for (const { name, stock } of existingIngredients) {
       if (quantities[name] > stock) {
         this.mediator.send({
+          sender: this,
           event: InventoryEvent.PURCHASE_INGREDIENT,
           data: { request, missingIngredient: name },
         });
@@ -39,9 +62,10 @@ export class IngredientsService {
 
     if (!missingIngredient) {
       this.ingredientsRepository.updateMany(ingredientsToUpdate);
-      this.mediator.send({
-        event: InventoryEvent.FULFILL_INGREDIENTS,
-        data: { request },
+      this.ingredientsEventHandler.send({
+        queue:
+          "https://sqs.us-east-1.amazonaws.com/181939780845/fulfilledIngredients", // TODO: change to env variable
+        data: JSON.stringify(request),
       });
     }
   }
