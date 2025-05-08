@@ -9,7 +9,7 @@ export class MarketApiAdapter implements MarketAdapter {
     // Simulate a network request to the market API
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve({ qtySold: 1 });
+        resolve({ qtySold: Math.floor(Math.random() * 6) });
       }, 1000);
     });
   }

@@ -16,6 +16,7 @@ export class OrdersService {
     this.ordersEventHandler.receive({
       queue: config.FULFILLED_INGREDIENTS_QUEUE_URL,
       callback: (payload) => {
+        console.log("PAYLOAD RECEIVED FROM WAREHOUSE", payload);
         const { dishId, userId, orderId } = JSON.parse(payload);
         this.prepareDish({ dishId, userId, orderId });
       },

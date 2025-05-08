@@ -9,20 +9,17 @@ import { IngredientsRequest } from "./interfaces/ingredients-request";
 
 export class PurchasesService {
   private readonly purchasesRepository: Repository<Purchase>;
-  private readonly mediator: Mediator;
   private readonly market: MarketAdapter;
+  public mediator!: Mediator;
 
   constructor({
     purchasesRepository,
-    mediator,
     market,
   }: {
     purchasesRepository: Repository<Purchase>;
-    mediator: Mediator;
     market: MarketAdapter;
   }) {
     this.purchasesRepository = purchasesRepository;
-    this.mediator = mediator;
     this.market = market;
   }
 
@@ -37,12 +34,25 @@ export class PurchasesService {
     request: IngredientsRequest;
     ingredient: IngredientName;
   }): Promise<void> {
+    console.log("Creating purchase for ingredient:", ingredient);
     try {
       let attempts = 0;
       const attemptPurchase = async () => {
         attempts++;
+        console.log(
+          "Attempting to purchase ingredient:",
+          ingredient,
+          "attempt:",
+          attempts
+        );
         try {
           const { qtySold } = await this.market.buy({ ingredient });
+          console.log(
+            "Purchased ingredient:",
+            ingredient,
+            "purchased quantity:",
+            qtySold
+          );
           if (qtySold <= 0) {
             setTimeout(attemptPurchase, attempts * 10000);
           } else {
@@ -54,7 +64,6 @@ export class PurchasesService {
                 quantity: qtySold,
               });
               this.mediator.send({
-                sender: this,
                 event: InventoryEvent.CHECK_INGREDIENTS,
                 data: { request },
               });

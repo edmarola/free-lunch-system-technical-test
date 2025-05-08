@@ -9,16 +9,17 @@ import { PurchasesRepository } from "./repositories/purchases-repository";
 import { config } from "../config";
 
 export const bootstrap = async () => {
-  const inventoryService = new InventoryService();
   const purchasesService = new PurchasesService({
-    mediator: inventoryService,
     market: new MarketApiAdapter(config.MARKET_API_URL),
     purchasesRepository: new PurchasesRepository(),
   });
   const ingredientsService = new IngredientsService({
-    mediator: inventoryService,
     ingredientsRepository: new IngredientsRepository(),
     ingredientsEventHandler: new IngredientsEventHandler(),
+  });
+  const inventoryService = new InventoryService({
+    purchasesService,
+    ingredientsService,
   });
 
   createServer(async (req, res) => {
@@ -35,7 +36,7 @@ export const bootstrap = async () => {
           res.writeHead(200);
           res.end(JSON.stringify(purchases));
         } else if (url.pathname === "/warehouse/ingredients") {
-          const ingredients = await ingredientsService.getIngredients;
+          const ingredients = await ingredientsService.getIngredients();
           res.writeHead(200);
           res.end(JSON.stringify(ingredients));
         } else {

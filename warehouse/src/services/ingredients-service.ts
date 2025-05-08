@@ -8,20 +8,17 @@ import { InventoryEvent } from "./types/inventory-event";
 
 export class IngredientsService {
   private readonly ingredientsRepository: Repository<Ingredient>;
-  private readonly mediator: Mediator;
   private readonly ingredientsEventHandler: EventHandler;
+  public mediator!: Mediator;
 
   constructor({
     ingredientsRepository,
-    mediator,
     ingredientsEventHandler,
   }: {
     ingredientsRepository: Repository<Ingredient>;
-    mediator: Mediator;
     ingredientsEventHandler: EventHandler;
   }) {
     this.ingredientsRepository = ingredientsRepository;
-    this.mediator = mediator;
     this.ingredientsEventHandler = ingredientsEventHandler;
     this.ingredientsEventHandler.receive({
       queue: config.REQUESTED_INGREDIENTS_QUEUE_URL,
@@ -46,11 +43,15 @@ export class IngredientsService {
     );
     let missingIngredient = false;
     const ingredientsToUpdate: Ingredient[] = [];
+    console.log("Existing ingrediends: ", existingIngredients);
 
     for (const { name, stock } of existingIngredients) {
       if (quantities[name] > stock) {
+        console.log(
+          `Missing ingredient: ${name}, required: ${quantities[name]}, available: ${stock}`
+        );
+        missingIngredient = true;
         this.mediator.send({
-          sender: this,
           event: InventoryEvent.PURCHASE_INGREDIENT,
           data: { request, missingIngredient: name },
         });
@@ -61,10 +62,11 @@ export class IngredientsService {
     }
 
     if (!missingIngredient) {
-      this.ingredientsRepository.updateMany(ingredientsToUpdate);
+      console.log("Successfully preparation ingredients: ", request);
+      await this.ingredientsRepository.updateMany(ingredientsToUpdate);
       this.ingredientsEventHandler.send({
         queue: config.FULFILLED_INGREDIENTS_QUEUE_URL,
-        data: JSON.stringify(request),
+        data: request,
       });
     }
   }

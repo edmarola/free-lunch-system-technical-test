@@ -14,7 +14,7 @@ import {
   UpdateCommandInput,
 } from "@aws-sdk/lib-dynamodb";
 
-const client = new DynamoDBClient({});
+const client = new DynamoDBClient();
 const docClient = DynamoDBDocumentClient.from(client);
 
 export class OrdersRepository implements Repository<Order> {
