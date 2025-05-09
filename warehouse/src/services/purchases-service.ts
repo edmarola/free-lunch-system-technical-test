@@ -54,7 +54,12 @@ export class PurchasesService {
             qtySold
           );
           if (qtySold <= 0) {
-            setTimeout(attemptPurchase, attempts * 10000);
+            console.log(
+              "No quantity sold, retrying purchase in",
+              attempts * 10000,
+              "ms"
+            );
+            setTimeout(async () => await attemptPurchase(), attempts * 10000);
           } else {
             try {
               await this.purchasesRepository.create({
@@ -75,7 +80,7 @@ export class PurchasesService {
           console.error("Error attempting purchase", error);
         }
       };
-      attemptPurchase();
+      await attemptPurchase();
     } catch (error) {
       console.error("Error creating purchase", error);
     }
