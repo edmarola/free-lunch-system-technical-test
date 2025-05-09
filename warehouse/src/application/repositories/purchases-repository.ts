@@ -47,8 +47,7 @@ export class PurchasesRepository implements Repository<Purchase> {
       ],
     });
 
-    const response = await docClient.send(command);
-    console.log("Response from DynamoDB (TransactWriteCommand):", response);
+    await docClient.send(command);
     return item;
   }
 

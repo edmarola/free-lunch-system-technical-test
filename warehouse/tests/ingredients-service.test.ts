@@ -103,7 +103,6 @@ describe("Ingredients Service", () => {
 
     // Assert that the mediator's send method is not called
     expect(mediator.send).not.toHaveBeenCalled();
-    console.log("completed sucessfully");
   });
 
   it("should request ingredient purchase when some ingredients are missing", async () => {

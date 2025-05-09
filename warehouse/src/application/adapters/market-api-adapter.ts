@@ -9,8 +9,6 @@ export class MarketApiAdapter implements MarketAdapter {
   }: {
     ingredient: IngredientName;
   }): Promise<{ qtySold: number }> {
-    console.log("Buying item from market API:", ingredient, this.baseUrl);
-
     // Simulate a network request to the market API
     // return new Promise((resolve) => {
     //   setTimeout(() => {

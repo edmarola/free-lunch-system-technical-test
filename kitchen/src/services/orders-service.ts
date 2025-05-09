@@ -16,7 +16,6 @@ export class OrdersService {
     this.ordersEventHandler.receive({
       queue: config.FULFILLED_INGREDIENTS_QUEUE_URL,
       callback: (payload) => {
-        console.log("PAYLOAD RECEIVED FROM WAREHOUSE", payload);
         const { dishId, userId, orderId } = JSON.parse(payload);
         this.prepareDish({ dishId, userId, orderId });
       },
@@ -78,9 +77,6 @@ export class OrdersService {
     dishId: string;
   }): Promise<Order | undefined> {
     try {
-      console.log(
-        `Preparing dish ${dishId} for user ${userId} and order ${orderId}`
-      );
       const order = await this.ordersRepository.findById({
         userId,
         id: orderId,
@@ -108,7 +104,7 @@ export class OrdersService {
         }
       }
     } catch (error) {
-      console.log(
+      console.error(
         `Error preparing dish ${dishId} for user ${userId} and order ${orderId}: ${error}`
       );
     }

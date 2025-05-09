@@ -34,25 +34,12 @@ export class PurchasesService {
     request: IngredientsRequest;
     ingredient: IngredientName;
   }): Promise<void> {
-    console.log("Creating purchase for ingredient:", ingredient);
     try {
       let attempts = 0;
       const attemptPurchase = async () => {
         attempts++;
-        console.log(
-          "Attempting to purchase ingredient:",
-          ingredient,
-          "attempt:",
-          attempts
-        );
         try {
           const { qtySold } = await this.market.buy({ ingredient });
-          console.log(
-            "Purchased ingredient:",
-            ingredient,
-            "purchased quantity:",
-            qtySold
-          );
           if (qtySold <= 0) {
             console.log(
               "No quantity sold, retrying purchase in",

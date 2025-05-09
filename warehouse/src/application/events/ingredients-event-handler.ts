@@ -22,10 +22,7 @@ export class IngredientsEventHandler implements EventHandler {
       const poll = async () => {
         console.log("Long poll started, waiting 20 seconds for messages... ");
         const result = await sqs.receiveMessage(params);
-        console.log(
-          "Long poll finalized, next poll will start in 10 seconds.",
-          result
-        );
+        console.log("Long poll finalized, next poll will start in 10 seconds.");
         setTimeout(poll, 10000);
         const { Messages } = result;
         if (Messages) {
@@ -36,9 +33,8 @@ export class IngredientsEventHandler implements EventHandler {
           };
           try {
             const result = await sqs.deleteMessage(deleteParams);
-            console.log("Message deleted:", result);
           } catch (error) {
-            console.log("Error deleting message", error);
+            console.error("Error deleting message", error);
           } finally {
             callback(Messages[0].Body);
           }
@@ -47,7 +43,7 @@ export class IngredientsEventHandler implements EventHandler {
 
       poll();
     } catch (error) {
-      console.log("Error receiving message", error);
+      console.error("Error receiving message", error);
     }
   }
   public async send({

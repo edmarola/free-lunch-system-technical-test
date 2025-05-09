@@ -39,10 +39,8 @@ export class IngredientsRepository implements Repository<Ingredient> {
       },
     }));
     const params = { TransactItems: transactItems };
-    console.log("Params for TransactWriteCommand:", params);
     const command = new TransactWriteCommand(params);
-    const result = await docClient.send(command);
-    console.log("Response from DynamoDB (TransactWriteCommand):", result);
+    await docClient.send(command);
     return items;
   }
   create(item: Ingredient): Promise<Ingredient> {

@@ -43,13 +43,9 @@ export class IngredientsService {
     );
     let missingIngredient = false;
     const ingredientsToUpdate: Ingredient[] = [];
-    console.log("Existing ingredients: ", existingIngredients);
 
     for (const { name, stock } of existingIngredients) {
       if (quantities[name] > stock) {
-        console.log(
-          `Missing ingredient: ${name}, required: ${quantities[name]}, available: ${stock}`
-        );
         missingIngredient = true;
         this.mediator.send({
           event: InventoryEvent.PURCHASE_INGREDIENT,
@@ -62,8 +58,13 @@ export class IngredientsService {
     }
 
     if (!missingIngredient) {
-      console.log("Successfully preparation ingredients: ", request);
       await this.ingredientsRepository.updateMany(ingredientsToUpdate);
+      console.debug(
+        "FULFILLED INGREDIENTS FOR DISH: ",
+        request.dishId,
+        "ORDER:",
+        request.orderId
+      );
       await this.ingredientsEventHandler.send({
         queue: config.FULFILLED_INGREDIENTS_QUEUE_URL,
         data: request,

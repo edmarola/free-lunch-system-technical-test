@@ -25,9 +25,7 @@ export class OrdersRepository implements Repository<Order> {
       TableName: this.tableName,
       Item: order,
     });
-
-    const response = await docClient.send(command);
-    console.log("Response from DynamoDB:", response);
+    await docClient.send(command);
     return order;
   }
   async update({
@@ -57,11 +55,9 @@ export class OrdersRepository implements Repository<Order> {
       },
       ReturnValues: "ALL_NEW",
     };
-    console.log("Params for UpdateCommand:", order);
     const command = new UpdateCommand(params);
     try {
-      const response = await docClient.send(command);
-      console.log("Response from DynamoDB (UpdateCommand):", response);
+      await docClient.send(command);
       return order;
     } catch (error) {
       console.error("Error from DynamoDB (UpdateCommand):", error);
@@ -86,7 +82,6 @@ export class OrdersRepository implements Repository<Order> {
 
     const command = new GetCommand(params);
     const { Item } = await docClient.send(command);
-    console.log("Response from DynamoDB (GetCommand):", Item);
     return Item as Order;
   }
 
