@@ -64,7 +64,7 @@ export class IngredientsService {
     if (!missingIngredient) {
       console.log("Successfully preparation ingredients: ", request);
       await this.ingredientsRepository.updateMany(ingredientsToUpdate);
-      this.ingredientsEventHandler.send({
+      await this.ingredientsEventHandler.send({
         queue: config.FULFILLED_INGREDIENTS_QUEUE_URL,
         data: request,
       });

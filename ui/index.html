@@ -291,8 +291,8 @@
         const fetchAndPopulateOrders = async () => {
             const statusFilter = document.getElementById("order-status-filter").value;
             const url = statusFilter === "ALL" 
-                ? "http://localhost/kitchen/orders" 
-                : `http://localhost/kitchen/orders?status=${statusFilter}`;
+                ? "/kitchen/orders" 
+                : `/kitchen/orders?status=${statusFilter}`;
             const response = await fetch(url);
             const orders = await response.json();
             const tbody = document.getElementById("orders-table-body");
@@ -364,7 +364,7 @@
 
         // Fetch and populate recipes
         const fetchAndPopulateRecipes = async () => {
-            const response = await fetch("http://localhost/kitchen/recipes");
+            const response = await fetch("/kitchen/recipes");
             const recipes = await response.json();
             const tbody = document.getElementById("recipes-table-body");
             tbody.innerHTML = ""; // Clear existing rows
@@ -386,7 +386,7 @@
 
         // Fetch and populate ingredients
         const fetchAndPopulateIngredients = async () => {
-            const response = await fetch("http://localhost/warehouse/ingredients");
+            const response = await fetch("/warehouse/ingredients");
             const ingredients = await response.json();
             const tbody = document.getElementById("ingredients-table-body");
             tbody.innerHTML = ""; // Clear existing rows
@@ -402,7 +402,7 @@
 
         // Fetch and populate purchases
         const fetchAndPopulatePurchases = async () => {
-            const response = await fetch("http://localhost/warehouse/purchases");
+            const response = await fetch("/warehouse/purchases");
             const purchases = await response.json();
             const tbody = document.getElementById("purchases-table-body");
             tbody.innerHTML = ""; // Clear existing rows
@@ -422,7 +422,7 @@
         const createOrder = async (event) => {
             event.preventDefault();
             const dishesQuantity = document.getElementById("dishes-quantity").value;
-            const response = await fetch("http://localhost/kitchen/orders", {
+            const response = await fetch("/kitchen/orders", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ dishesQuantity: parseInt(dishesQuantity) })
