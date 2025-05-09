@@ -43,7 +43,7 @@ export class IngredientsService {
     );
     let missingIngredient = false;
     const ingredientsToUpdate: Ingredient[] = [];
-    console.log("Existing ingrediends: ", existingIngredients);
+    console.log("Existing ingredients: ", existingIngredients);
 
     for (const { name, stock } of existingIngredients) {
       if (quantities[name] > stock) {
