@@ -1,5 +1,5 @@
 import { describe, expect, it, jest } from "@jest/globals";
-import { OrdersEventHandler } from "../src/application/events/orders-event-handler";
+import { OrdersEventHandler } from "../src/application/events/sqs/orders-event-handler";
 import { Order, OrderStatus } from "../src/models/order";
 import { Repository } from "../src/services/interfaces/repository";
 import { OrdersService } from "../src/services/orders-service";

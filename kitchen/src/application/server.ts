@@ -5,7 +5,7 @@ import { OrderSchema } from "@/application/schemas/order-schema";
 import { createServer } from "http";
 import { ZodError } from "zod";
 import { Order, OrderStatus } from "@/models/order";
-import { OrdersEventHandler } from "./events/orders-event-handler";
+import { OrdersEventHandler } from "./events/kafka/orders-event-handler";
 import { config } from "@/config";
 
 export const bootstrap = async () => {

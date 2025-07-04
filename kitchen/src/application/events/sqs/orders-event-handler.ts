@@ -5,15 +5,15 @@ const sqs = new SQS();
 
 export class OrdersEventHandler implements EventHandler {
   public async receive({
-    queue,
+    destination,
     callback,
   }: {
-    queue: string;
+    destination: string;
     callback: (data: any) => void;
   }): Promise<void> {
     const params = {
       MessageAttributeNames: ["All"],
-      QueueUrl: queue,
+      QueueUrl: destination,
       VisibilityTimeout: 20,
       MaxNumberOfMessages: 1,
       WaitTimeSeconds: 20,
@@ -28,7 +28,7 @@ export class OrdersEventHandler implements EventHandler {
         if (Messages) {
           console.log("Message received:", Messages[0]);
           const deleteParams = {
-            QueueUrl: queue,
+            QueueUrl: destination,
             ReceiptHandle: Messages[0].ReceiptHandle,
           };
           try {
@@ -47,16 +47,16 @@ export class OrdersEventHandler implements EventHandler {
     }
   }
   public async send({
-    queue,
+    destination,
     data,
   }: {
-    queue: string;
+    destination: string;
     data: any;
   }): Promise<void> {
     const params = {
       MessageBody: JSON.stringify(data),
       MessageGroupId: "Group1",
-      QueueUrl: queue,
+      QueueUrl: destination,
     };
     const result = await sqs.sendMessage(params);
     console.log("Message sent:", result);

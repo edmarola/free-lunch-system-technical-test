@@ -21,7 +21,7 @@ export class IngredientsService {
     this.ingredientsRepository = ingredientsRepository;
     this.ingredientsEventHandler = ingredientsEventHandler;
     this.ingredientsEventHandler.receive({
-      queue: config.REQUESTED_INGREDIENTS_QUEUE_URL,
+      destination: config.REQUESTED_INGREDIENTS_BROKER_DESTINATION,
       callback: (payload) => {
         const data = JSON.parse(payload);
         this.checkIngredients(data as IngredientsRequest);
@@ -59,14 +59,8 @@ export class IngredientsService {
 
     if (!missingIngredient) {
       await this.ingredientsRepository.updateMany(ingredientsToUpdate);
-      console.debug(
-        "FULFILLED INGREDIENTS FOR DISH: ",
-        request.dishId,
-        "ORDER:",
-        request.orderId
-      );
       await this.ingredientsEventHandler.send({
-        queue: config.FULFILLED_INGREDIENTS_QUEUE_URL,
+        destination: config.FULFILLED_INGREDIENTS_BROKER_DESTINATION,
         data: request,
       });
     }

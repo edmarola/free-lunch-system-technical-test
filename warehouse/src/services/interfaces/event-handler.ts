@@ -1,10 +1,16 @@
 export interface EventHandler {
   receive: ({
-    queue,
+    destination,
     callback,
   }: {
-    queue: string;
+    destination: string;
     callback: (data: any) => void;
   }) => Promise<void>;
-  send: ({ queue, data }: { queue: string; data: any }) => Promise<void>;
+  send: ({
+    destination,
+    data,
+  }: {
+    destination: string;
+    data: any;
+  }) => Promise<void>;
 }

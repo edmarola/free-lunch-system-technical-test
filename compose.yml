@@ -29,6 +29,15 @@ services:
       - ./ui/index.html:/usr/share/nginx/html/index.html:ro
     networks:
       - app-network
+  
+  broker:
+    image: apache/kafka:4.0.0
+    container_name: broker
+    restart: always
+    ports:
+      - "9092:9092"
+    networks:
+      - app-network
 
 networks:
   app-network:

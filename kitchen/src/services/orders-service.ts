@@ -14,7 +14,7 @@ export class OrdersService {
     private readonly ordersEventHandler: EventHandler
   ) {
     this.ordersEventHandler.receive({
-      queue: config.FULFILLED_INGREDIENTS_QUEUE_URL,
+      destination: config.FULFILLED_INGREDIENTS_BROKER_DESTINATION,
       callback: (payload) => {
         const { dishId, userId, orderId } = JSON.parse(payload);
         this.prepareDish({ dishId, userId, orderId });
@@ -122,7 +122,7 @@ export class OrdersService {
     ingredients: Ingredient[];
   }): void {
     this.ordersEventHandler.send({
-      queue: config.REQUESTED_INGREDIENTS_QUEUE_URL,
+      destination: config.REQUESTED_INGREDIENTS_BROKER_DESTINATION,
       data: {
         userId,
         orderId,

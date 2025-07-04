@@ -7,8 +7,14 @@ const envSchema = z.object({
   PORT: z.coerce.number().default(3000),
   PURCHASES_TABLE: z.string(),
   INGREDIENTS_TABLE: z.string(),
-  FULFILLED_INGREDIENTS_QUEUE_URL: z.string().url().startsWith("https://sqs."),
-  REQUESTED_INGREDIENTS_QUEUE_URL: z.string().url().startsWith("https://sqs."),
+  FULFILLED_INGREDIENTS_BROKER_DESTINATION: z
+    .string()
+    .url()
+    .startsWith("https://sqs."),
+  REQUESTED_INGREDIENTS_BROKER_DESTINATION: z
+    .string()
+    .url()
+    .startsWith("https://sqs."),
   MARKET_API_URL: z.string().url(),
 });
 
